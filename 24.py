@@ -61,8 +61,32 @@ def three_card_algo(cards=example_card[:3]):
     for i in CARD_COMBINATIONS:
         two_card = two_card_algo([cards[i[0]],cards[i[1]]])
         third_card_index = [x for x in (0,1,2) if x not in i][0]
-        for i in two_card:
-            three_card = two_card_algo([i,cards[third_card_index]])
-            print(three_card)
-        
-three_card_algo()
+        operation_tracker = 0
+        operation_msg = msg_generator(cards[i[0]],cards[i[1]])
+        #for each new number generated from two_cards. Ex: [14, 10, -10, 24, 6.0, 0.16666666666666666]
+        for new_number_index in range(len(two_card)):
+            three_card = two_card_algo([two_card[new_number_index],cards[third_card_index]])
+            if(24 in three_card):
+                for i in range(len(three_card)):
+                    if(three_card[i] == 24):
+                        temp_solutions = []
+                        #appends how the new two_card number was obtained
+                        temp_solutions.append(operation_msg[operation_tracker])
+                        #appends how the three_card number was obtained
+                        temp_solutions.append(msg_generator(two_card[new_number_index],cards[third_card_index])[i])
+                        solutions.append(tuple(temp_solutions))
+            #update operation
+            operation_tracker+=1
+    for i in solutions:
+        print(i)
+
+
+def msg_generator(card1,card2):
+     return ["{} + {} = {}".format(card1, card2,card1+card2),
+                         "{} - {} = {}".format(card1, card2,card1-card2),
+                         "{} - {} = {}".format(card2, card1,card2-card1),
+                         "{} * {} = {}".format(card1, card2,card1*card2),
+                         "{} / {} = {}".format(card1, card2,card1/card2),
+                         "{} / {} = {}".format(card2, card1,card2/card1)]
+
+three_card_algo(generate_cards())
