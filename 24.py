@@ -1,6 +1,7 @@
 import random
 from itertools import combinations
 
+
 example_card = [12, 2, 1, 6]
 
 '''
@@ -23,8 +24,7 @@ def show_cards(cards):
     return cards
 
 '''
-applies basic functions to list of 4 numbers and saves the 6 results
-indexs:
+generate messages for all operations in list format
 0 - add
 1 - subtract a-b
 2 - subtract b-a
@@ -42,7 +42,9 @@ def msg_generator(card1,card2):
                          "{} - {} = {}".format(card2, card1,card2-card1),
                          "{} * {} = {}".format(card1, card2,card1*card2)]+div
 
-
+'''
+algorithum for two cards, produce list of length 6
+'''
 def two_card_algo(cards= example_card[:2]):
     div = []
     if(cards[0] != 0 and cards[1] != 0):
@@ -50,61 +52,69 @@ def two_card_algo(cards= example_card[:2]):
     results= [cards[0]+cards[1],cards[0]-cards[1],cards[1]-cards[0],cards[0]*cards[1]] + div
     return results
 
-def three_card_algo(cards=example_card[:3]):
+'''
+algorithum for three cards, prints all possible solution to 24 with the given 3 cards
+'''
+def three_card_algo(cards= example_card[:3]):
     CARD_COMBINATIONS = [(0, 1),(0, 2),(1, 2)]
-
     solutions = []
+    #for every combination of 2 cards
     for i in CARD_COMBINATIONS:
-        two_card = two_card_algo([cards[i[0]],cards[i[1]]])
+        #produce 2 card results and find index of 3rd card
+        two_card_results = two_card_algo([cards[i[0]],cards[i[1]]])
         third_card_index = [x for x in (0,1,2) if x not in i][0]
-        operation_tracker = 0
-        operation_msg = msg_generator(cards[i[0]],cards[i[1]])
-        #for each new number generated from two_cards. Ex: [14, 10, -10, 24, 6.0, 0.16666666666666666]
-        for new_number_index in range(len(two_card)):
-            three_card = two_card_algo([two_card[new_number_index],cards[third_card_index]])
-            if(24 in three_card):
-                for i in range(len(three_card)):
-                    if(three_card[i] == 24):
-                        temp_solutions = []
-                        #appends how the new two_card number was obtained
-                        temp_solutions.append(operation_msg[operation_tracker])
-                        #appends how the three_card number was obtained
-                        temp_solutions.append(msg_generator(two_card[new_number_index],cards[third_card_index])[i])
-                        solutions.append(tuple(temp_solutions))
-            #update operation
-            operation_tracker+=1
+        #for every results within 2 card results (6 results)
+        for two_card_result_index in range(len(two_card_results)):
+            #find new results with the new 3rd card (6 results) and generate msg for 2 card results using indexing
+            third_card_results = two_card_algo([two_card_results[two_card_result_index], cards[third_card_index]])
+            two_card_msg = msg_generator(cards[i[0]],cards[i[1]])[two_card_result_index]
+            #if 24 is within third card results then find the index of the 24
+            if(24 in third_card_results):
+                for third_card_results_indicies in range(len(third_card_results)):
+                    #generate msg using index of 3 card results that has 24
+                    three_card_msg = msg_generator(two_card_results[two_card_result_index],cards[third_card_index])[third_card_results_indicies]
+                    if(third_card_results[third_card_results_indicies] == 24):
+                        #adds solution into solution list
+                        solutions.append((two_card_msg,three_card_msg))
     for i in solutions:
         print(i)
 
+'''
+algorithum for four cards, prints all possible solution to 24 with the given 4 cards
+'''
 def four_card_algo(cards=example_card):
+    #lists all combinations of 2 cards
     CARD_COMBINATIONS = list(combinations([0,1,2,3],2))
     solutions = []
+    #for every combination of 2 cards
     for i in CARD_COMBINATIONS:
         two_card_results = two_card_algo([cards[i[0]],cards[i[1]]])
-        third_card_index = [x for x in (0,1,2,3) if x not in i]
-
-        two_card_operation_tracker = 0
-        two_card_operation_msg = msg_generator(cards[i[0]],cards[i[1]])
-        test = []
-
+        third_card_index_list = [x for x in (0,1,2,3) if x not in i]
         #loop through index of two card results
-        for new_number_index in range(len(two_card_results)):
+        for two_card_result_index in range(len(two_card_results)):
             #loop through remaining combinations. Ex: first iteration - [2,3]
-            for third_card in third_card_index:
+            for third_card_index in third_card_index_list:
                 #generate results and msg
-                three_card_results = two_card_algo([two_card_results[new_number_index],cards[third_card]])
-                three_card_msg = msg_generator(two_card_results[new_number_index],cards[third_card])
-                three_card_dictionary = {k:v for (k,v) in zip(three_card_results,three_card_msg)}
+                three_card_results = two_card_algo([two_card_results[two_card_result_index],cards[third_card_index]])
+                two_card_msg = msg_generator(cards[i[0]],cards[i[1]])[two_card_result_index]
                 #use 4th number
-                fourth_card_index = [x for x in (0,1,2,3) if x not in list(i)+ [third_card]][0]
-                for fourth_number_index in range(len(three_card_dictionary.keys())):
-                    fouth_card_results = two_card_algo([list(three_card_dictionary.keys())[fourth_number_index],cards[fourth_card_index]])
-                    fouth_card_msg = msg_generator(list(three_card_dictionary.keys())[fourth_number_index],cards[fourth_card_index])
+                fourth_card_index = [x for x in (0,1,2,3) if x not in list(i)+ [third_card_index]][0]
+                for fourth_number_index in range(len(three_card_results)):
+                    fouth_card_results = two_card_algo([three_card_results[third_card_index],cards[fourth_card_index]])
+                    three_card_msg = msg_generator(two_card_results[two_card_result_index],cards[third_card_index])[third_card_index]
                     if(24 in fouth_card_results):
-                        for i in range(len(fouth_card_results)):
-                            if(fouth_card_results[i] == 24):
-                                temp_solutions = []
-                                #appends how the new two_card number was obtained
-                                temp_solutions.append(two_card_operation_msg[two_card_operation_tracker])
+                        for four_card_results_index in range(len(fouth_card_results)):
+                            four_card_msg = msg_generator(three_card_results[third_card_index],cards[fourth_card_index])[four_card_results_index]
+                            if(fouth_card_results[four_card_results_index]==24):
+                                solutions.append((two_card_msg,three_card_msg,four_card_msg))
+    if(not solutions):
+        print("No Solution")
+    else:
+        print("Solutions:")
+        for i in set(solutions):
+            print(i)
+    
 
-four_card_algo()
+cards =generate_cards()
+print("Let's play 24! Here are your cards:",cards)
+four_card_algo(cards)
