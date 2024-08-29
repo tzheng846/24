@@ -1,38 +1,39 @@
 import random
 from itertools import combinations
+from itertools import permutations
 
 
 example_card = [12, 2, 1, 6]
 
-'''
-generates random 4 numbers from 1 to 13
-'''
+
 def generate_cards():
+    '''
+    generates random 4 numbers from 1 to 13
+    '''
     all_cards = [1,2,3,4,5,6,7,8,9,10,11,12,13]
     cards =[]
     for i in range(4):
         cards.append(int(random.choice(all_cards)))
     return cards
-'''
-displays numbers as cards- 11 is J, 12 is Q, 13 is K
-'''
 def show_cards(cards):
+    '''
+    displays numbers as cards- 11 is J, 12 is Q, 13 is K
+    '''
     dct = {11:"J",12:"Q",13:"K"}
     for i in range(len(cards)):
         if cards[i] in dct.keys():
             cards[i] = dct[cards[i]]
     return cards
-
-'''
-generate messages for all operations in list format
-0 - add
-1 - subtract a-b
-2 - subtract b-a
-3 - multiply
-4 - divide a/b
-5 - divide b/a
-'''
 def msg_generator(card1,card2):
+    '''
+    generate messages for all operations in list format
+    0 - add
+    1 - subtract a-b
+    2 - subtract b-a
+    3 - multiply
+    4 - divide a/b
+    5 - divide b/a
+    '''
     div = []
     if(card1 != 0 and card2!= 0):
         div = ["{} / {} = {}".format(card1, card2,card1/card2),
@@ -41,21 +42,19 @@ def msg_generator(card1,card2):
                          "{} - {} = {}".format(card1, card2,card1-card2),
                          "{} - {} = {}".format(card2, card1,card2-card1),
                          "{} * {} = {}".format(card1, card2,card1*card2)]+div
-
-'''
-algorithum for two cards, produce list of length 6
-'''
 def two_card_algo(cards= example_card[:2]):
+    '''
+    algorithum for two cards, produce list of length 6
+    '''
     div = []
     if(cards[0] != 0 and cards[1] != 0):
         div = [cards[0]/cards[1],cards[1]/cards[0]]
     results= [cards[0]+cards[1],cards[0]-cards[1],cards[1]-cards[0],cards[0]*cards[1]] + div
     return results
-
-'''
-algorithum for three cards, prints all possible solution to 24 with the given 3 cards
-'''
 def three_card_algo(cards= example_card[:3]):
+    '''
+    algorithum for three cards, prints all possible solution to 24 with the given 3 cards
+    '''
     CARD_COMBINATIONS = [(0, 1),(0, 2),(1, 2)]
     solutions = []
     #for every combination of 2 cards
@@ -78,11 +77,10 @@ def three_card_algo(cards= example_card[:3]):
                         solutions.append((two_card_msg,three_card_msg))
     for i in solutions:
         print(i)
-
-'''
-algorithum for four cards, prints all possible solution to 24 with the given 4 cards
-'''
 def four_card_algo(cards=example_card):
+    '''
+    algorithum for four cards, prints all possible solution to 24 with the given 4 cards
+    '''
     #lists all combinations of 2 cards
     CARD_COMBINATIONS = list(combinations([0,1,2,3],2))
     solutions = []
@@ -107,14 +105,42 @@ def four_card_algo(cards=example_card):
                             four_card_msg = msg_generator(three_card_results[third_card_index],cards[fourth_card_index])[four_card_results_index]
                             if(fouth_card_results[four_card_results_index]==24):
                                 solutions.append((two_card_msg,three_card_msg,four_card_msg))
+    return list(set(solutions))
+def play_game():
+    '''
+    call to run game
+    '''
+    cards =generate_cards()
+    print("Let's play 24! Here are your cards:",cards)
+    solutions = four_card_algo(cards)
     if(not solutions):
         print("No Solution")
     else:
-        print("Solutions:")
-        for i in set(solutions):
+        for i in solutions:
             print(i)
-    
+def find_all_permutations_solutions():
+    '''
+    finds solution for all permutation of cards, write to file if solution exists
+    '''
+    dictionary = {}
+    all_cards = [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    permutation_of_hands = list(permutations(all_cards,4))
+    for i in permutation_of_hands:
+        solutions = four_card_algo(i)
+        if(solutions):
+            dictionary.update({tuple(i):solutions})
+    dict_to_txt(dictionary, 'solutions.txt')
+    return dictionary
 
-cards =generate_cards()
-print("Let's play 24! Here are your cards:",cards)
-four_card_algo(cards)
+dictionary = find_all_permutations_solutions()
+def dict_to_txt(dictionary, file_name):
+    """
+    Writes the contents of a dictionary to a text file.
+    
+    Parameters:
+    dictionary (dict): The dictionary to write to the file.
+    file_name (str): The name of the file to write to (including .txt extension).
+    """
+    with open(file_name, 'w') as file:
+        for key, value in dictionary.items():
+            file.write(f"{key}: {value}\n")
